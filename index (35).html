@@ -1,0 +1,1693 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Core Realty - Barbados Real Estate</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-color: #1e3a8a;
+            --primary-dark: #1e40af;
+            --secondary-color: #3b82f6;
+            --accent-color: #60a5fa;
+            --text-dark: #1f2937;
+            --text-light: #6b7280;
+            --text-white: #ffffff;
+            --background-white: #ffffff;
+            --background-gray: #f8fafc;
+            --border-color: #e5e7eb;
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            line-height: 1.6;
+            color: var(--text-dark);
+            background-color: var(--background-white);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Navigation */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border-color);
+            z-index: 1000;
+            transition: all 0.3s ease;
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 70px;
+        }
+
+        .nav-brand h2 {
+            color: var(--primary-color);
+            font-weight: 700;
+            font-size: 1.5rem;
+        }
+
+        .nav-menu {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .nav-link {
+            text-decoration: none;
+            color: var(--text-dark);
+            font-weight: 500;
+            transition: color 0.3s ease;
+            position: relative;
+        }
+
+        .nav-link:hover {
+            color: var(--primary-color);
+        }
+
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--primary-color);
+            transition: width 0.3s ease;
+        }
+
+        .nav-link:hover::after {
+            width: 100%;
+        }
+
+        .nav-toggle {
+            display: none;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: var(--text-dark);
+            cursor: pointer;
+        }
+
+        /* Hero Section */
+        .hero {
+            margin-top: 70px;
+            padding: 80px 0;
+            background: linear-gradient(135deg, var(--background-white) 0%, var(--background-gray) 100%);
+            display: flex;
+            align-items: center;
+            min-height: 90vh;
+        }
+
+        .hero-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+            align-items: center;
+        }
+
+        .hero-text h1 {
+            font-size: 3.5rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-bottom: 1.5rem;
+            line-height: 1.2;
+        }
+
+        .hero-text p {
+            font-size: 1.2rem;
+            color: var(--text-light);
+            margin-bottom: 2rem;
+        }
+
+        .hero-image img {
+            width: 100%;
+            height: 500px;
+            object-fit: cover;
+            border-radius: 20px;
+            box-shadow: var(--shadow-xl);
+        }
+
+        /* Property Search */
+        .hero-search {
+            background: var(--background-white);
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: var(--shadow-xl);
+            border: 1px solid var(--border-color);
+        }
+
+        .search-tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .tab-btn {
+            padding: 0.75rem 1.5rem;
+            border: 1px solid var(--border-color);
+            background: var(--background-white);
+            color: var(--text-light);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .tab-btn.active {
+            background: var(--primary-color);
+            color: var(--text-white);
+            border-color: var(--primary-color);
+        }
+
+        .search-form {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .search-input {
+            position: relative;
+            flex: 1;
+        }
+
+        .search-input i {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-light);
+        }
+
+        .search-input input {
+            width: 100%;
+            padding: 1rem 1rem 1rem 3rem;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .search-input input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+
+        .search-filters {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+        }
+
+        .search-filters select {
+            padding: 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 1rem;
+            background: var(--background-white);
+            cursor: pointer;
+            transition: border-color 0.3s ease;
+        }
+
+        .search-filters select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+
+        .search-btn {
+            background: var(--primary-color);
+            color: var(--text-white);
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            justify-content: center;
+        }
+
+        .search-btn:hover {
+            background: var(--primary-dark);
+        }
+
+        /* Section Headers */
+        .section-header {
+            text-align: center;
+            margin-bottom: 4rem;
+        }
+
+        .section-header h2 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-bottom: 1rem;
+        }
+
+        .section-header p {
+            font-size: 1.1rem;
+            color: var(--text-light);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* Featured Properties */
+        .featured-properties {
+            padding: 80px 0;
+            background: var(--background-gray);
+        }
+
+        .properties-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .property-card {
+            background: var(--background-white);
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: var(--shadow-md);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .property-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-xl);
+        }
+
+        .property-image {
+            position: relative;
+            height: 250px;
+            overflow: hidden;
+        }
+
+        .property-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+
+        .property-card:hover .property-image img {
+            transform: scale(1.05);
+        }
+
+        .property-badge {
+            position: absolute;
+            top: 1rem;
+            left: 1rem;
+            background: var(--primary-color);
+            color: var(--text-white);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+
+        .favorite-btn {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: rgba(255, 255, 255, 0.9);
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .favorite-btn:hover {
+            background: var(--background-white);
+            color: var(--primary-color);
+        }
+
+        .property-info {
+            padding: 1.5rem;
+        }
+
+        .property-price {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .property-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 0.5rem;
+        }
+
+        .property-location {
+            color: var(--text-light);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .property-features {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .feature {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            color: var(--text-light);
+            font-size: 0.875rem;
+        }
+
+        .feature i {
+            color: var(--primary-color);
+        }
+
+        .property-agent {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .agent-avatar {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .agent-name {
+            font-size: 0.875rem;
+            color: var(--text-light);
+        }
+
+        /* Agents Section */
+        .agents-section {
+            padding: 80px 0;
+            background: var(--background-white);
+        }
+
+        .agents-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .agent-card {
+            background: var(--background-white);
+            border: 1px solid var(--border-color);
+            border-radius: 15px;
+            padding: 2rem;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .agent-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .agent-photo {
+            position: relative;
+            width: 100px;
+            height: 100px;
+            margin: 0 auto 1.5rem;
+        }
+
+        .agent-photo img {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid var(--primary-color);
+        }
+
+        .agent-status {
+            position: absolute;
+            bottom: 5px;
+            right: 5px;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            border: 2px solid var(--background-white);
+        }
+
+        .agent-status.online {
+            background: #10b981;
+        }
+
+        .agent-info h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 0.5rem;
+        }
+
+        .agent-title {
+            color: var(--text-light);
+            margin-bottom: 1rem;
+        }
+
+        .agent-rating {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.25rem;
+            margin-bottom: 1rem;
+        }
+
+        .agent-rating .fas.fa-star.filled {
+            color: #fbbf24;
+        }
+
+        .agent-rating .fas.fa-star {
+            color: var(--border-color);
+        }
+
+        .rating-count {
+            color: var(--text-light);
+            font-size: 0.875rem;
+            margin-left: 0.5rem;
+        }
+
+        .agent-stats {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-number {
+            display: block;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+
+        .stat-label {
+            font-size: 0.875rem;
+            color: var(--text-light);
+        }
+
+        .agent-specialties {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            justify-content: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .specialty-tag {
+            background: var(--background-gray);
+            color: var(--text-dark);
+            padding: 0.25rem 0.75rem;
+            border-radius: 15px;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .agent-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+        }
+
+        /* Buttons */
+        .btn-primary {
+            background: var(--primary-color);
+            color: var(--text-white);
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-decoration: none;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: var(--background-white);
+            color: var(--primary-color);
+            border: 1px solid var(--primary-color);
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-secondary:hover {
+            background: var(--primary-color);
+            color: var(--text-white);
+            transform: translateY(-2px);
+        }
+
+        /* Services Section */
+        .services-section {
+            padding: 80px 0;
+            background: var(--background-gray);
+        }
+
+        .services-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+        }
+
+        .service-card {
+            background: var(--background-white);
+            padding: 2rem;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: var(--shadow-md);
+            transition: all 0.3s ease;
+        }
+
+        .service-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .service-icon {
+            width: 80px;
+            height: 80px;
+            background: var(--primary-color);
+            color: var(--text-white);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.5rem;
+            font-size: 2rem;
+        }
+
+        .service-card h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 1rem;
+        }
+
+        .service-card p {
+            color: var(--text-light);
+            line-height: 1.6;
+        }
+
+        /* About Section */
+        .about-section {
+            padding: 80px 0;
+            background: var(--background-white);
+        }
+
+        .about-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+            align-items: center;
+        }
+
+        .about-text h2 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-bottom: 1.5rem;
+        }
+
+        .about-text .lead {
+            font-size: 1.2rem;
+            font-weight: 500;
+            color: var(--text-dark);
+            margin-bottom: 1.5rem;
+        }
+
+        .about-text p {
+            color: var(--text-light);
+            margin-bottom: 2rem;
+            line-height: 1.7;
+        }
+
+        .about-stats {
+            display: flex;
+            gap: 2rem;
+        }
+
+        .about-image img {
+            width: 100%;
+            height: 400px;
+            object-fit: cover;
+            border-radius: 15px;
+            box-shadow: var(--shadow-lg);
+        }
+
+        /* Contact Section */
+        .contact-section {
+            padding: 80px 0;
+            background: var(--background-gray);
+        }
+
+        .contact-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+        }
+
+        .contact-info {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        .contact-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+        }
+
+        .contact-icon {
+            width: 50px;
+            height: 50px;
+            background: var(--primary-color);
+            color: var(--text-white);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .contact-item h4 {
+            color: var(--text-dark);
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        .contact-item p {
+            color: var(--text-light);
+            line-height: 1.5;
+        }
+
+        .contact-form {
+            background: var(--background-white);
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: var(--shadow-md);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+            font-family: inherit;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 120px;
+        }
+
+        /* Footer */
+        .footer {
+            background: var(--text-dark);
+            color: var(--text-white);
+            padding: 60px 0 20px;
+        }
+
+        .footer-content {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr;
+            gap: 3rem;
+            margin-bottom: 3rem;
+        }
+
+        .footer-section h3,
+        .footer-section h4 {
+            margin-bottom: 1.5rem;
+            font-weight: 600;
+        }
+
+        .footer-section h3 {
+            color: var(--primary-color);
+            font-size: 1.5rem;
+        }
+
+        .footer-section p {
+            color: #9ca3af;
+            line-height: 1.6;
+            margin-bottom: 1.5rem;
+        }
+
+        .footer-section ul {
+            list-style: none;
+        }
+
+        .footer-section ul li {
+            margin-bottom: 0.5rem;
+        }
+
+        .footer-section ul li a {
+            color: #9ca3af;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .footer-section ul li a:hover {
+            color: var(--text-white);
+        }
+
+        .social-links {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .social-links a {
+            width: 40px;
+            height: 40px;
+            background: var(--primary-color);
+            color: var(--text-white);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .social-links a:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+
+        .footer-bottom {
+            border-top: 1px solid #374151;
+            padding-top: 2rem;
+        }
+
+        .footer-bottom-content {
+            text-align: center;
+            color: #9ca3af;
+        }
+
+        .footer-bottom-content p {
+            margin-bottom: 0.5rem;
+        }
+
+        .footer-bottom-content a {
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+
+        .footer-bottom-content a:hover {
+            text-decoration: underline;
+        }
+
+        .section-cta {
+            text-align: center;
+            margin-top: 2rem;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1024px) {
+            .hero-content {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+                text-align: center;
+            }
+
+            .hero-text h1 {
+                font-size: 3rem;
+            }
+
+            .hero-image img {
+                height: 400px;
+            }
+
+            .search-filters {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .about-content {
+                grid-template-columns: 1fr;
+            }
+
+            .contact-content {
+                grid-template-columns: 1fr;
+            }
+
+            .footer-content {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .nav-menu {
+                position: fixed;
+                top: 70px;
+                left: 0;
+                right: 0;
+                background: var(--background-white);
+                flex-direction: column;
+                padding: 2rem;
+                box-shadow: var(--shadow-lg);
+                transform: translateY(-100%);
+                opacity: 0;
+                visibility: hidden;
+                transition: all 0.3s ease;
+            }
+
+            .nav-menu.active {
+                transform: translateY(0);
+                opacity: 1;
+                visibility: visible;
+            }
+
+            .nav-toggle {
+                display: block;
+            }
+
+            .hero-text h1 {
+                font-size: 2.5rem;
+            }
+
+            .hero-image img {
+                height: 300px;
+            }
+
+            .search-filters {
+                grid-template-columns: 1fr;
+            }
+
+            .properties-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .agents-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .services-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .about-stats {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .footer-content {
+                grid-template-columns: 1fr;
+            }
+
+            .agent-actions {
+                flex-direction: column;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 0 15px;
+            }
+
+            .hero-text h1 {
+                font-size: 2rem;
+            }
+
+            .section-header h2 {
+                font-size: 2rem;
+            }
+
+            .about-text h2 {
+                font-size: 2rem;
+            }
+
+            .hero-search {
+                padding: 1.5rem;
+            }
+
+            .hero-image img {
+                height: 250px;
+            }
+
+            .property-image {
+                height: 200px;
+            }
+
+            .agent-stats {
+                gap: 1rem;
+            }
+
+            .service-icon {
+                width: 60px;
+                height: 60px;
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="navbar">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <h2>Core Realty</h2>
+            </div>
+            <nav class="nav-menu" x-data="{ open: false }" :class="{ 'active': open }">
+                <a href="#home" class="nav-link">Home</a>
+                <a href="#properties" class="nav-link">Properties</a>
+                <a href="#agents" class="nav-link">Agents</a>
+                <a href="#about" class="nav-link">About</a>
+                <a href="#contact" class="nav-link">Contact</a>
+            </nav>
+            <button class="nav-toggle" x-data="{ open: false }" @click="open = !open">
+                <i class="fas fa-bars" x-show="!open"></i>
+                <i class="fas fa-times" x-show="open"></i>
+            </button>
+        </div>
+    </header>
+
+    <section id="home" class="hero">
+        <div class="hero-content">
+            <div class="hero-text">
+                <h1>Find Your Dream Property in Barbados</h1>
+                <p>Discover luxury homes, beachfront properties, and investment opportunities with Core Realty's expert guidance.</p>
+                <div class="hero-search" x-data="propertySearch()">
+                    <div class="search-tabs">
+                        <button class="tab-btn" :class="{ 'active': searchType === 'buy' }" @click="searchType = 'buy'">Buy</button>
+                        <button class="tab-btn" :class="{ 'active': searchType === 'rent' }" @click="searchType = 'rent'">Rent</button>
+                        <button class="tab-btn" :class="{ 'active': searchType === 'sell' }" @click="searchType = 'sell'">Sell</button>
+                    </div>
+                    <div class="search-form">
+                        <div class="search-input">
+                            <i class="fas fa-search"></i>
+                            <input type="text" placeholder="City, Neighborhood, or ZIP" x-model="searchQuery">
+                        </div>
+                        <div class="search-filters">
+                            <select x-model="propertyType">
+                                <option value="">Property Type</option>
+                                <option value="house">House</option>
+                                <option value="apartment">Apartment</option>
+                                <option value="condo">Condo</option>
+                                <option value="villa">Villa</option>
+                                <option value="land">Land</option>
+                            </select>
+                            <select x-model="priceRange">
+                                <option value="">Price Range</option>
+                                <option value="0-500k">$0 - $500K</option>
+                                <option value="500k-1m">$500K - $1M</option>
+                                <option value="1m-2m">$1M - $2M</option>
+                                <option value="2m+">$2M+</option>
+                            </select>
+                            <select x-model="bedrooms">
+                                <option value="">Bedrooms</option>
+                                <option value="1">1+</option>
+                                <option value="2">2+</option>
+                                <option value="3">3+</option>
+                                <option value="4">4+</option>
+                                <option value="5">5+</option>
+                            </select>
+                        </div>
+                        <button class="search-btn" @click="searchProperties()">
+                            <i class="fas fa-search"></i>
+                            Search Properties
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="hero-image">
+                <img src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=600&h=500&fit=crop" alt="Luxury Property">
+            </div>
+        </div>
+    </section>
+
+    <section id="properties" class="featured-properties">
+        <div class="container">
+            <div class="section-header">
+                <h2>Featured Properties</h2>
+                <p>Discover our handpicked selection of premium properties</p>
+            </div>
+            <div class="properties-grid" x-data="featuredProperties()">
+                <template x-for="property in properties" :key="property.id">
+                    <div class="property-card" @click="viewProperty(property.id)">
+                        <div class="property-image">
+                            <img :src="property.image" :alt="property.title">
+                            <div class="property-badge" x-text="property.status"></div>
+                            <button class="favorite-btn" @click.stop="toggleFavorite(property.id)">
+                                <i class="fas fa-heart"></i>
+                            </button>
+                        </div>
+                        <div class="property-info">
+                            <div class="property-price" x-text="property.price"></div>
+                            <div class="property-title" x-text="property.title"></div>
+                            <div class="property-location">
+                                <i class="fas fa-map-marker-alt"></i>
+                                <span x-text="property.location"></span>
+                            </div>
+                            <div class="property-features">
+                                <div class="feature">
+                                    <i class="fas fa-bed"></i>
+                                    <span x-text="property.bedrooms + ' Beds'"></span>
+                                </div>
+                                <div class="feature">
+                                    <i class="fas fa-bath"></i>
+                                    <span x-text="property.bathrooms + ' Baths'"></span>
+                                </div>
+                                <div class="feature">
+                                    <i class="fas fa-ruler-combined"></i>
+                                    <span x-text="property.sqft + ' sqft'"></span>
+                                </div>
+                            </div>
+                            <div class="property-agent">
+                                <img class="agent-avatar" :src="property.agent.avatar" :alt="property.agent.name">
+                                <span class="agent-name" x-text="property.agent.name"></span>
+                            </div>
+                        </div>
+                    </div>
+                </template>
+            </div>
+            <div class="section-cta">
+                <a href="#" class="btn-primary">View All Properties</a>
+            </div>
+        </div>
+    </section>
+
+    <section id="agents" class="agents-section">
+        <div class="container">
+            <div class="section-header">
+                <h2>Our Expert Agents</h2>
+                <p>Meet our certified professionals ready to help you find your perfect property</p>
+            </div>
+            <div class="agents-grid" x-data="agentsData()">
+                <template x-for="agent in agents" :key="agent.id">
+                    <div class="agent-card">
+                        <div class="agent-photo">
+                            <img :src="agent.photo" :alt="agent.name">
+                            <div class="agent-status" :class="{ 'online': agent.online }"></div>
+                        </div>
+                        <div class="agent-info">
+                            <h3 x-text="agent.name"></h3>
+                            <div class="agent-title" x-text="agent.title"></div>
+                            <div class="agent-rating">
+                                <template x-for="i in 5">
+                                    <i class="fas fa-star" :class="{ 'filled': i <= agent.rating }"></i>
+                                </template>
+                                <span class="rating-count" x-text="'(' + agent.reviews + ')'"></span>
+                            </div>
+                            <div class="agent-stats">
+                                <div class="stat">
+                                    <span class="stat-number" x-text="agent.listings"></span>
+                                    <span class="stat-label">Active Listings</span>
+                                </div>
+                                <div class="stat">
+                                    <span class="stat-number" x-text="agent.sold"></span>
+                                    <span class="stat-label">Properties Sold</span>
+                                </div>
+                            </div>
+                            <div class="agent-specialties">
+                                <template x-for="specialty in agent.specialties">
+                                    <span class="specialty-tag" x-text="specialty"></span>
+                                </template>
+                            </div>
+                            <div class="agent-actions">
+                                <button class="btn-primary" @click="contactAgent(agent.id)">
+                                    <i class="fas fa-envelope"></i>
+                                    Contact
+                                </button>
+                                <a href="#" class="btn-secondary" @click.prevent="viewAgentProfile(agent.id)">
+                                    <i class="fas fa-user"></i>
+                                    View Profile
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </template>
+            </div>
+        </div>
+    </section>
+
+    <section id="services" class="services-section">
+        <div class="container">
+            <div class="section-header">
+                <h2>Our Services</h2>
+                <p>Comprehensive real estate solutions tailored to your needs</p>
+            </div>
+            <div class="services-grid">
+                <div class="service-card">
+                    <div class="service-icon"><i class="fas fa-home"></i></div>
+                    <h3>Property Sales</h3>
+                    <p>Expert guidance through every step of buying or selling your property with market insights and negotiation expertise.</p>
+                </div>
+                <div class="service-card">
+                    <div class="service-icon"><i class="fas fa-key"></i></div>
+                    <h3>Rental Management</h3>
+                    <p>Full-service rental management including tenant screening, maintenance, and rent collection for maximum returns.</p>
+                </div>
+                <div class="service-card">
+                    <div class="service-icon"><i class="fas fa-chart-line"></i></div>
+                    <h3>Investment Advisory</h3>
+                    <p>Strategic investment advice and market analysis to help you build a profitable real estate portfolio.</p>
+                </div>
+                <div class="service-card">
+                    <div class="service-icon"><i class="fas fa-calculator"></i></div>
+                    <h3>Property Valuation</h3>
+                    <p>Accurate property valuations using comparative market analysis and local expertise for informed decisions.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="about" class="about-section">
+        <div class="container">
+            <div class="about-content">
+                <div class="about-text">
+                    <h2>About Core Realty</h2>
+                    <p class="lead">With over 15 years of experience in Barbados real estate, Core Realty has established itself as the premier choice for discerning buyers, sellers, and investors.</p>
+                    <p>Our team of certified professionals combines deep local knowledge with cutting-edge technology to deliver exceptional results. Whether you're looking for a beachfront villa, investment property, or your first home, we're committed to making your real estate journey smooth and successful.</p>
+                    <div class="about-stats">
+                        <div class="stat">
+                            <span class="stat-number">500+</span>
+                            <span class="stat-label">Properties Sold</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-number">15+</span>
+                            <span class="stat-label">Years Experience</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-number">98%</span>
+                            <span class="stat-label">Client Satisfaction</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="about-image">
+                    <img src="https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=600&h=400&fit=crop" alt="About Core Realty">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="contact" class="contact-section">
+        <div class="container">
+            <div class="section-header">
+                <h2>Get In Touch</h2>
+                <p>Ready to find your perfect property? Contact us today</p>
+            </div>
+            <div class="contact-content">
+                <div class="contact-info">
+                    <div class="contact-item">
+                        <div class="contact-icon"><i class="fas fa-map-marker-alt"></i></div>
+                        <div>
+                            <h4>Visit Our Office</h4>
+                            <p>123 Bay Street, Bridgetown<br>Barbados, BB11000</p>
+                        </div>
+                    </div>
+                    <div class="contact-item">
+                        <div class="contact-icon"><i class="fas fa-phone"></i></div>
+                        <div>
+                            <h4>Call Us</h4>
+                            <p>+1 (246) 123-4567<br>+1 (246) 987-6543</p>
+                        </div>
+                    </div>
+                    <div class="contact-item">
+                        <div class="contact-icon"><i class="fas fa-envelope"></i></div>
+                        <div>
+                            <h4>Email Us</h4>
+                            <p>info@corerealty.bb<br>sales@corerealty.bb</p>
+                        </div>
+                    </div>
+                    <div class="contact-item">
+                        <div class="contact-icon"><i class="fas fa-clock"></i></div>
+                        <div>
+                            <h4>Office Hours</h4>
+                            <p>Mon - Fri: 9:00 AM - 6:00 PM<br>Sat: 9:00 AM - 4:00 PM</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="contact-form" x-data="contactForm()">
+                    <div class="form-group">
+                        <input type="text" placeholder="Full Name" x-model="form.name">
+                    </div>
+                    <div class="form-group">
+                        <input type="email" placeholder="Email Address" x-model="form.email">
+                    </div>
+                    <div class="form-group">
+                        <input type="tel" placeholder="Phone Number" x-model="form.phone">
+                    </div>
+                    <div class="form-group">
+                        <select x-model="form.interest">
+                            <option value="">I'm interested in...</option>
+                            <option value="buying">Buying a Property</option>
+                            <option value="selling">Selling a Property</option>
+                            <option value="renting">Renting a Property</option>
+                            <option value="investment">Investment Opportunities</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <textarea placeholder="Your Message" x-model="form.message"></textarea>
+                    </div>
+                    <button class="btn-primary" @click="submitForm()" :disabled="submitting">
+                        <span x-show="!submitting"><i class="fas fa-paper-plane"></i> Send Message</span>
+                        <span x-show="submitting">Sending...</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>Core Realty</h3>
+                    <p>Your trusted partner in Barbados real estate. We're committed to helping you find the perfect property and achieve your real estate goals.</p>
+                    <div class="social-links">
+                        <a href="#"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fab fa-linkedin-in"></i></a>
+                    </div>
+                </div>
+                <div class="footer-section">
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a href="#properties">Properties</a></li>
+                        <li><a href="#agents">Agents</a></li>
+                        <li><a href="#about">About Us</a></li>
+                        <li><a href="#contact">Contact</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Property Types</h4>
+                    <ul>
+                        <li><a href="#">Luxury Homes</a></li>
+                        <li><a href="#">Beachfront Properties</a></li>
+                        <li><a href="#">Condominiums</a></li>
+                        <li><a href="#">Investment Properties</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Areas We Serve</h4>
+                    <ul>
+                        <li><a href="#">Christ Church</a></li>
+                        <li><a href="#">St. Michael</a></li>
+                        <li><a href="#">St. James</a></li>
+                        <li><a href="#">St. Philip</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <div class="footer-bottom-content">
+                    <p>&copy; 2024 Core Realty. All rights reserved. | <a href="#">Privacy Policy</a> | <a href="#">Terms of Service</a></p>
+                    <p>Licensed Real Estate Broker in Barbados</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+    <script>
+        // Property Search Component
+        function propertySearch() {
+            return {
+                searchType: 'buy',
+                searchQuery: '',
+                propertyType: '',
+                priceRange: '',
+                bedrooms: '',
+                searchProperties() {
+                    console.log('Searching properties:', {
+                        type: this.searchType,
+                        query: this.searchQuery,
+                        propertyType: this.propertyType,
+                        priceRange: this.priceRange,
+                        bedrooms: this.bedrooms
+                    });
+                    alert('Search functionality will be connected to property database');
+                }
+            }
+        }
+
+        // Featured Properties Component
+        function featuredProperties() {
+            return {
+                properties: [
+                    {
+                        id: 1,
+                        title: "Luxury Beachfront Villa",
+                        price: "$2,850,000",
+                        location: "St. James, Barbados",
+                        bedrooms: 5,
+                        bathrooms: 4,
+                        sqft: "4,200",
+                        status: "For Sale",
+                        image: "https://images.unsplash.com/photo-1613490493576-7fde63acd811?w=400&h=300&fit=crop",
+                        agent: {
+                            name: "Sarah Johnson",
+                            avatar: "https://images.unsplash.com/photo-1494790108755-2616b612b647?w=50&h=50&fit=crop&crop=face"
+                        }
+                    },
+                    {
+                        id: 2,
+                        title: "Modern Penthouse Apartment",
+                        price: "$1,250,000",
+                        location: "Christ Church, Barbados",
+                        bedrooms: 3,
+                        bathrooms: 3,
+                        sqft: "2,800",
+                        status: "For Sale",
+                        image: "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=400&h=300&fit=crop",
+                        agent: {
+                            name: "Michael Brown",
+                            avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=50&h=50&fit=crop&crop=face"
+                        }
+                    },
+                    {
+                        id: 3,
+                        title: "Charming Coral Stone House",
+                        price: "$875,000",
+                        location: "St. Philip, Barbados",
+                        bedrooms: 4,
+                        bathrooms: 3,
+                        sqft: "3,100",
+                        status: "For Sale",
+                        image: "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=400&h=300&fit=crop",
+                        agent: {
+                            name: "Emma Wilson",
+                            avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=50&h=50&fit=crop&crop=face"
+                        }
+                    },
+                    {
+                        id: 4,
+                        title: "Contemporary Townhouse",
+                        price: "$650,000",
+                        location: "St. Michael, Barbados",
+                        bedrooms: 3,
+                        bathrooms: 2,
+                        sqft: "2,400",
+                        status: "For Sale",
+                        image: "https://images.unsplash.com/photo-1570129477492-45c003edd2be?w=400&h=300&fit=crop",
+                        agent: {
+                            name: "James Davis",
+                            avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=50&h=50&fit=crop&crop=face"
+                        }
+                    },
+                    {
+                        id: 5,
+                        title: "Oceanview Investment Property",
+                        price: "$1,450,000",
+                        location: "St. James, Barbados",
+                        bedrooms: 4,
+                        bathrooms: 4,
+                        sqft: "3,600",
+                        status: "For Sale",
+                        image: "https://images.unsplash.com/photo-1582268611958-ebfd161ef9cf?w=400&h=300&fit=crop",
+                        agent: {
+                            name: "Lisa Martinez",
+                            avatar: "https://images.unsplash.com/photo-1489424731084-a5d8b219a5bb?w=50&h=50&fit=crop&crop=face"
+                        }
+                    },
+                    {
+                        id: 6,
+                        title: "Historic Plantation House",
+                        price: "$3,200,000",
+                        location: "St. George, Barbados",
+                        bedrooms: 6,
+                        bathrooms: 5,
+                        sqft: "5,400",
+                        status: "For Sale",
+                        image: "https://images.unsplash.com/photo-1600047509807-ba8f99d2cdde?w=400&h=300&fit=crop",
+                        agent: {
+                            name: "Robert Taylor",
+                            avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=50&h=50&fit=crop&crop=face"
+                        }
+                    }
+                ],
+                viewProperty(id) {
+                    console.log('Viewing property:', id);
+                    alert('Property details page will be implemented');
+                },
+                toggleFavorite(id) {
+                    console.log('Toggle favorite for property:', id);
+                }
+            }
+        }
+
+        // Agents Component
+        function agentsData() {
+            return {
+                agents: [
+                    {
+                        id: 1,
+                        name: "Sarah Johnson",
+                        title: "Senior Real Estate Agent",
+                        photo: "https://images.unsplash.com/photo-1494790108755-2616b612b647?w=200&h=200&fit=crop&crop=face",
+                        rating: 5,
+                        reviews: 87,
+                        listings: 45,
+                        sold: 156,
+                        online: true,
+                        specialties: ["Luxury Homes", "Beachfront", "Investment"]
+                    },
+                    {
+                        id: 2,
+                        name: "Michael Brown",
+                        title: "Property Investment Specialist",
+                        photo: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=200&h=200&fit=crop&crop=face",
+                        rating: 5,
+                        reviews: 62,
+                        listings: 32,
+                        sold: 94,
+                        online: true,
+                        specialties: ["Investment", "Commercial", "Rental"]
+                    },
+                    {
+                        id: 3,
+                        name: "Emma Wilson",
+                        title: "Residential Sales Agent",
+                        photo: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=200&h=200&fit=crop&crop=face",
+                        rating: 4,
+                        reviews: 71,
+                        listings: 28,
+                        sold: 118,
+                        online: false,
+                        specialties: ["First Time Buyers", "Family Homes", "Condos"]
+                    },
+                    {
+                        id: 4,
+                        name: "James Davis",
+                        title: "Luxury Property Consultant",
+                        photo: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&h=200&fit=crop&crop=face",
+                        rating: 5,
+                        reviews: 103,
+                        listings: 18,
+                        sold: 67,
+                        online: true,
+                        specialties: ["Luxury", "Villas", "High-End"]
+                    }
+                ],
+                contactAgent(id) {
+                    const agent = this.agents.find(a => a.id === id);
+                    console.log('Contacting agent:', agent.name);
+                    alert(`Contact form for ${agent.name} will be implemented`);
+                },
+                viewAgentProfile(id) {
+                    const agent = this.agents.find(a => a.id === id);
+                    console.log('Viewing profile:', agent.name);
+                    alert(`Profile page for ${agent.name} will be implemented`);
+                }
+            }
+        }
+
+        // Contact Form Component
+        function contactForm() {
+            return {
+                form: {
+                    name: '',
+                    email: '',
+                    phone: '',
+                    interest: '',
+                    message: ''
+                },
+                submitting: false,
+                async submitForm() {
+                    this.submitting = true;
+                    await new Promise(resolve => setTimeout(resolve, 2000));
+                    console.log('Form submitted:', this.form);
+                    alert('Thank you for your message! We will contact you soon.');
+                    this.form = {
+                        name: '',
+                        email: '',
+                        phone: '',
+                        interest: '',
+                        message: ''
+                    };
+                    this.submitting = false;
+                }
+            }
+        }
+
+        // Smooth scrolling and navbar effects
+        document.addEventListener('DOMContentLoaded', function() {
+            const navLinks = document.querySelectorAll('.nav-link');
+            navLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const targetId = this.getAttribute('href').substring(1);
+                    const targetElement = document.getElementById(targetId);
+                    if (targetElement) {
+                        const offsetTop = targetElement.offsetTop - 70;
+                        window.scrollTo({
+                            top: offsetTop,
+                            behavior: 'smooth'
+                        });
+                    }
+                });
+            });
+
+            const navbar = document.querySelector('.navbar');
+            let lastScrollTop = 0;
+            window.addEventListener('scroll', function() {
+                const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+                if (scrollTop > 100) {
+                    navbar.style.background = 'rgba(255, 255, 255, 0.98)';
+                    navbar.style.boxShadow = '0 2px 20px rgba(0, 0, 0, 0.1)';
+                } else {
+                    navbar.style.background = 'rgba(255, 255, 255, 0.95)';
+                    navbar.style.boxShadow = 'none';
+                }
+                lastScrollTop = scrollTop;
+            });
+
+            const observerOptions = {
+                threshold: 0.1,
+                rootMargin: '0px 0px -50px 0px'
+            };
+
+            const observer = new IntersectionObserver(function(entries) {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.style.opacity = '1';
+                        entry.target.style.transform = 'translateY(0)';
+                    }
+                });
+            }, observerOptions);
+
+            const animateElements = document.querySelectorAll('.property-card, .agent-card, .service-card');
+            animateElements.forEach(el => {
+                el.style.opacity = '0';
+                el.style.transform = 'translateY(30px)';
+                el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+                observer.observe(el);
+            });
+        });
+    </script>
+</body>
+</html>
