@@ -1,0 +1,433 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Core Realty - Premium Real Estate in Barbados</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar" x-data="{ mobileOpen: false }">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <h2>Core Realty</h2>
+            </div>
+            
+            <div class="nav-menu" :class="{ 'active': mobileOpen }">
+                <a href="#home" class="nav-link">Home</a>
+                <a href="#properties" class="nav-link">Properties</a>
+                <a href="#agents" class="nav-link">Agents</a>
+                <a href="#about" class="nav-link">About</a>
+                <a href="#contact" class="nav-link">Contact</a>
+            </div>
+            
+            <button class="nav-toggle" @click="mobileOpen = !mobileOpen">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section id="home" class="hero">
+        <div class="hero-content">
+            <div class="hero-text">
+                <h1>Find Your Dream Property in Barbados</h1>
+                <p>Discover luxury homes, beachfront properties, and investment opportunities with Core Realty's expert guidance.</p>
+                
+                <!-- Property Search -->
+                <div class="hero-search" x-data="propertySearch()">
+                    <div class="search-tabs">
+                        <button class="tab-btn" :class="{ 'active': searchType === 'buy' }" @click="searchType = 'buy'">Buy</button>
+                        <button class="tab-btn" :class="{ 'active': searchType === 'rent' }" @click="searchType = 'rent'">Rent</button>
+                        <button class="tab-btn" :class="{ 'active': searchType === 'sell' }" @click="searchType = 'sell'">Sell</button>
+                    </div>
+                    
+                    <div class="search-form">
+                        <div class="search-input">
+                            <i class="fas fa-search"></i>
+                            <input type="text" placeholder="Enter location, property type, or keywords..." x-model="searchQuery">
+                        </div>
+                        
+                        <div class="search-filters">
+                            <select x-model="propertyType">
+                                <option value="">Property Type</option>
+                                <option value="house">House</option>
+                                <option value="apartment">Apartment</option>
+                                <option value="condo">Condo</option>
+                                <option value="villa">Villa</option>
+                                <option value="land">Land</option>
+                            </select>
+                            
+                            <select x-model="priceRange">
+                                <option value="">Price Range</option>
+                                <option value="0-500000">$0 - $500K</option>
+                                <option value="500000-1000000">$500K - $1M</option>
+                                <option value="1000000-2000000">$1M - $2M</option>
+                                <option value="2000000+">$2M+</option>
+                            </select>
+                            
+                            <select x-model="bedrooms">
+                                <option value="">Bedrooms</option>
+                                <option value="1">1+</option>
+                                <option value="2">2+</option>
+                                <option value="3">3+</option>
+                                <option value="4">4+</option>
+                                <option value="5">5+</option>
+                            </select>
+                        </div>
+                        
+                        <button class="search-btn" @click="searchProperties()">
+                            <i class="fas fa-search"></i>
+                            Search Properties
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="hero-image">
+            <img src="https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=800&h=600&fit=crop" alt="Luxury Barbados Villa">
+        </div>
+    </section>
+
+    <!-- Featured Properties -->
+    <section id="properties" class="featured-properties">
+        <div class="container">
+            <div class="section-header">
+                <h2>Featured Properties</h2>
+                <p>Discover our handpicked selection of premium properties</p>
+            </div>
+            
+            <div class="properties-grid" x-data="featuredProperties()">
+                <template x-for="property in properties" :key="property.id">
+                    <div class="property-card" @click="viewProperty(property.id)">
+                        <div class="property-image">
+                            <img :src="property.image" :alt="property.title">
+                            <div class="property-badge" x-text="property.status"></div>
+                            <button class="favorite-btn" @click.stop="toggleFavorite(property.id)">
+                                <i class="far fa-heart"></i>
+                            </button>
+                        </div>
+                        
+                        <div class="property-info">
+                            <div class="property-price" x-text="property.price"></div>
+                            <h3 class="property-title" x-text="property.title"></h3>
+                            <p class="property-location" x-text="property.location"></p>
+                            
+                            <div class="property-features">
+                                <span class="feature">
+                                    <i class="fas fa-bed"></i>
+                                    <span x-text="property.bedrooms"></span> Beds
+                                </span>
+                                <span class="feature">
+                                    <i class="fas fa-bath"></i>
+                                    <span x-text="property.bathrooms"></span> Baths
+                                </span>
+                                <span class="feature">
+                                    <i class="fas fa-expand-arrows-alt"></i>
+                                    <span x-text="property.sqft"></span> sqft
+                                </span>
+                            </div>
+                            
+                            <div class="property-agent">
+                                <img :src="property.agent.avatar" :alt="property.agent.name" class="agent-avatar">
+                                <span class="agent-name" x-text="property.agent.name"></span>
+                            </div>
+                        </div>
+                    </div>
+                </template>
+            </div>
+            
+            <div class="section-cta">
+                <button class="btn-secondary">View All Properties</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Agents Section -->
+    <section id="agents" class="agents-section">
+        <div class="container">
+            <div class="section-header">
+                <h2>Our Expert Agents</h2>
+                <p>Meet our certified professionals ready to help you find your perfect property</p>
+            </div>
+            
+            <div class="agents-grid" x-data="agentsData()">
+                <template x-for="agent in agents" :key="agent.id">
+                    <div class="agent-card">
+                        <div class="agent-photo">
+                            <img :src="agent.photo" :alt="agent.name">
+                            <div class="agent-status online" x-show="agent.online"></div>
+                        </div>
+                        
+                        <div class="agent-info">
+                            <h3 x-text="agent.name"></h3>
+                            <p class="agent-title" x-text="agent.title"></p>
+                            <div class="agent-rating">
+                                <template x-for="i in 5" :key="i">
+                                    <i class="fas fa-star" :class="{ 'filled': i <= agent.rating }"></i>
+                                </template>
+                                <span class="rating-count" x-text="'(' + agent.reviews + ' reviews)'"></span>
+                            </div>
+                            
+                            <div class="agent-stats">
+                                <div class="stat">
+                                    <span class="stat-number" x-text="agent.listings"></span>
+                                    <span class="stat-label">Active Listings</span>
+                                </div>
+                                <div class="stat">
+                                    <span class="stat-number" x-text="agent.sold"></span>
+                                    <span class="stat-label">Properties Sold</span>
+                                </div>
+                            </div>
+                            
+                            <div class="agent-specialties">
+                                <template x-for="specialty in agent.specialties" :key="specialty">
+                                    <span class="specialty-tag" x-text="specialty"></span>
+                                </template>
+                            </div>
+                            
+                            <div class="agent-actions">
+                                <button class="btn-primary" @click="contactAgent(agent.id)">
+                                    <i class="fas fa-envelope"></i>
+                                    Contact
+                                </button>
+                                <button class="btn-secondary" @click="viewAgentProfile(agent.id)">
+                                    View Profile
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </template>
+            </div>
+        </div>
+    </section>
+
+    <!-- Services Section -->
+    <section class="services-section">
+        <div class="container">
+            <div class="section-header">
+                <h2>Our Services</h2>
+                <p>Comprehensive real estate solutions tailored to your needs</p>
+            </div>
+            
+            <div class="services-grid">
+                <div class="service-card">
+                    <div class="service-icon">
+                        <i class="fas fa-home"></i>
+                    </div>
+                    <h3>Property Sales</h3>
+                    <p>Expert guidance through every step of buying or selling your property with market insights and negotiation expertise.</p>
+                </div>
+                
+                <div class="service-card">
+                    <div class="service-icon">
+                        <i class="fas fa-key"></i>
+                    </div>
+                    <h3>Rental Management</h3>
+                    <p>Full-service rental management including tenant screening, maintenance, and rent collection for maximum returns.</p>
+                </div>
+                
+                <div class="service-card">
+                    <div class="service-icon">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <h3>Investment Advisory</h3>
+                    <p>Strategic investment advice and market analysis to help you build a profitable real estate portfolio.</p>
+                </div>
+                
+                <div class="service-card">
+                    <div class="service-icon">
+                        <i class="fas fa-calculator"></i>
+                    </div>
+                    <h3>Property Valuation</h3>
+                    <p>Accurate property valuations using comparative market analysis and local expertise for informed decisions.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section id="about" class="about-section">
+        <div class="container">
+            <div class="about-content">
+                <div class="about-text">
+                    <h2>About Core Realty</h2>
+                    <p class="lead">With over 15 years of experience in Barbados real estate, Core Realty has established itself as the premier choice for discerning buyers, sellers, and investors.</p>
+                    
+                    <p>Our team of certified professionals combines deep local knowledge with cutting-edge technology to deliver exceptional results. Whether you're looking for a beachfront villa, investment property, or your first home, we're committed to making your real estate journey smooth and successful.</p>
+                    
+                    <div class="about-stats">
+                        <div class="stat">
+                            <span class="stat-number">500+</span>
+                            <span class="stat-label">Properties Sold</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-number">15+</span>
+                            <span class="stat-label">Years Experience</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-number">98%</span>
+                            <span class="stat-label">Client Satisfaction</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="about-image">
+                    <img src="https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=600&h=400&fit=crop" alt="Core Realty Team">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact" class="contact-section">
+        <div class="container">
+            <div class="section-header">
+                <h2>Get In Touch</h2>
+                <p>Ready to find your perfect property? Contact us today</p>
+            </div>
+            
+            <div class="contact-content">
+                <div class="contact-info">
+                    <div class="contact-item">
+                        <div class="contact-icon">
+                            <i class="fas fa-map-marker-alt"></i>
+                        </div>
+                        <div>
+                            <h4>Visit Our Office</h4>
+                            <p>123 Bay Street, Bridgetown<br>Barbados, BB11000</p>
+                        </div>
+                    </div>
+                    
+                    <div class="contact-item">
+                        <div class="contact-icon">
+                            <i class="fas fa-phone"></i>
+                        </div>
+                        <div>
+                            <h4>Call Us</h4>
+                            <p>+1 (246) 123-4567<br>+1 (246) 987-6543</p>
+                        </div>
+                    </div>
+                    
+                    <div class="contact-item">
+                        <div class="contact-icon">
+                            <i class="fas fa-envelope"></i>
+                        </div>
+                        <div>
+                            <h4>Email Us</h4>
+                            <p>info@corerealty.bb<br>sales@corerealty.bb</p>
+                        </div>
+                    </div>
+                    
+                    <div class="contact-item">
+                        <div class="contact-icon">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <div>
+                            <h4>Office Hours</h4>
+                            <p>Mon - Fri: 9:00 AM - 6:00 PM<br>Sat: 9:00 AM - 4:00 PM</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="contact-form" x-data="contactForm()">
+                    <form @submit.prevent="submitForm()">
+                        <div class="form-group">
+                            <input type="text" placeholder="Your Name" x-model="form.name" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <input type="email" placeholder="Your Email" x-model="form.email" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <input type="tel" placeholder="Your Phone" x-model="form.phone">
+                        </div>
+                        
+                        <div class="form-group">
+                            <select x-model="form.interest" required>
+                                <option value="">I'm interested in...</option>
+                                <option value="buying">Buying a Property</option>
+                                <option value="selling">Selling a Property</option>
+                                <option value="renting">Renting a Property</option>
+                                <option value="investment">Investment Opportunities</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <textarea placeholder="Your Message" rows="5" x-model="form.message" required></textarea>
+                        </div>
+                        
+                        <button type="submit" class="btn-primary" :disabled="submitting">
+                            <span x-show="!submitting">Send Message</span>
+                            <span x-show="submitting">Sending...</span>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>Core Realty</h3>
+                    <p>Your trusted partner in Barbados real estate. We're committed to helping you find the perfect property and achieve your real estate goals.</p>
+                    
+                    <div class="social-links">
+                        <a href="#"><i class="fab fa-facebook"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-linkedin"></i></a>
+                    </div>
+                </div>
+                
+                <div class="footer-section">
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a href="#properties">Properties</a></li>
+                        <li><a href="#agents">Agents</a></li>
+                        <li><a href="#about">About Us</a></li>
+                        <li><a href="#contact">Contact</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-section">
+                    <h4>Property Types</h4>
+                    <ul>
+                        <li><a href="#">Luxury Homes</a></li>
+                        <li><a href="#">Beachfront Properties</a></li>
+                        <li><a href="#">Condominiums</a></li>
+                        <li><a href="#">Investment Properties</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-section">
+                    <h4>Areas We Serve</h4>
+                    <ul>
+                        <li><a href="#">Christ Church</a></li>
+                        <li><a href="#">St. Michael</a></li>
+                        <li><a href="#">St. James</a></li>
+                        <li><a href="#">St. Philip</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <div class="footer-bottom-content">
+                    <p>&copy; 2024 Core Realty. All rights reserved. | <a href="#">Privacy Policy</a> | <a href="#">Terms of Service</a></p>
+                    <p>Licensed Real Estate Broker in Barbados</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
